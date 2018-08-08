@@ -1,4 +1,6 @@
 # McAfee WebGateway API List Update
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+
 This simple python script allows you to update McAfee Web Gateway lists via the REST API.
 
 ## Prerequisites
