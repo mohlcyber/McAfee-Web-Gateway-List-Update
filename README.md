@@ -31,4 +31,4 @@ To see the changes in the McAfee Web Gateway UI click on Reload Data from Backen
 
 ![screen shot 2018-08-08 at 16 20 53](https://user-images.githubusercontent.com/25227268/43843096-0debc760-9b27-11e8-9b91-5f90dfe34efb.png)
 
-This script can also be used in combination with the McAfee ESM to create right click actions to Block IP's or Domains
+This script can also be used in combination with the McAfee ESM to create right click actions to Block IP's or Domains.
