@@ -57,8 +57,7 @@ def insert_list(headers, cookies, list, list_id, value):
     if res.status_code == 200:
         print('Successfull added the IP/Domain {0} to the list {1}'.format(value, list))
     else:
-        print res.content
-        print('Something Went Wrong')
+        print(res.content, 'Something Went Wrong')
     return res
 
 def commit(headers, cookies):
