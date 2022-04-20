@@ -1,19 +1,22 @@
 #!/usr/bin/env python
 
 import sys
-import requests
-import json
 import xml.etree.ElementTree as xml
 
-MWG_URL = 'http://1.1.1.1' #url of the web gateway
-MWG_PORT = '4711' #port of the web gateway
-MWG_USER = 'admin' #username
-MWG_PWD = 'password' #password
-VERIFY = False #https verification
+import requests
+from requests.structures import CaseInsensitiveDict
+
+
+MWG_URL = "https://1.1.1.1"  # url of the web gateway
+MWG_PORT = "4712"  # port of the web gateway
+MWG_USER = "user"  # username
+MWG_PWD = "password"  # password
+VERIFY = False  # https verification
 
 def login(headers):
     auth = {'userName': MWG_USER,
-            'pass': MWG_PWD}
+            'pass'    : MWG_PWD}
+    requests.packages.urllib3.disable_warnings()
 
     res = requests.post(MWG_URL + ':' + MWG_PORT + '/Konfigurator/REST/login', headers=headers, params=auth, verify=VERIFY)
 
@@ -25,18 +28,31 @@ def login(headers):
 
     return res.cookies['JSESSIONID']
 
+
+def create_backup(headers, cookies):
+    res = requests.post(MWG_URL + ':' + MWG_PORT + '/Konfigurator/REST/backup', cookies=cookies, headers=headers, verify=VERIFY)
+    with open('backup.txt', 'w') as f:
+        f.writelines(res.text)
+
+
 def get_list_id(headers, cookies, list):
     params = {'name': list}
-    res = requests.get(MWG_URL + ':' + MWG_PORT + '/Konfigurator/REST/list', headers=headers, cookies=cookies, params=params, verify=VERIFY)
-    res_parse = xml.fromstring(res.content).find('entry/id')
+    try:
+        res = requests.get(MWG_URL + ':' + MWG_PORT + '/Konfigurator/REST/list', cookies=cookies, params=params, headers=headers, verify=VERIFY)
 
-    if res.status_code == 200:
-        print('The ID for the list {0} is: {1}'.format(list, res_parse.text))
-    else:
-        print('Something went wrong')
-        sys.exit(1)
+        if res.status_code == 200:
+            res_parse = xml.fromstring(res.text).find('entry/id')
+            print('The ID for the list {0} is: {1}'.format(list, res_parse.text))
+            # com.scur.type.regex.4518
+        else:
+            print('Get_list_id: Something went wrong')
+            sys.exit(1)
+    except:
+        pass
 
     return res_parse.text
+
+
 
 def insert_list(headers, cookies, list, list_id, value):
     data = '''
@@ -51,18 +67,25 @@ def insert_list(headers, cookies, list, list_id, value):
             '''
     data = data.format(value)
 
-    res = requests.post(MWG_URL + ':' + MWG_PORT + '/Konfigurator/REST/list/' + list_id + '/entry/0/insert', \
-            headers=headers, cookies=cookies, data=data, verify=VERIFY)
+    try:
+        res = requests.post(MWG_URL + ':' + MWG_PORT + '/Konfigurator/REST/list/' + list_id + '/entry/0/insert', \
+                            headers=headers, cookies=cookies, data=data, verify=VERIFY)
 
-    if res.status_code == 200:
-        print('Successfull added the IP/Domain {0} to the list {1}'.format(value, list))
-    else:
-        print(res.content, 'Something Went Wrong')
+        if res.status_code == 200:
+            print('Successfull added the IP/Domain {0} to the list {1}'.format(value, list))
+        else:
+            print(res.content, 'Something Went Wrong')
+    except:
+        pass
     return res
+
+
 
 def commit(headers, cookies):
     res = requests.post(MWG_URL + ':' + MWG_PORT + '/Konfigurator/REST/commit', headers=headers, cookies=cookies, verify=VERIFY)
     return res.content
+
+
 
 def logout(headers, cookies):
     res = requests.post(MWG_URL + ':' + MWG_PORT + '/Konfigurator/REST/logout', headers=headers, cookies=cookies, verify=VERIFY)
@@ -73,19 +96,26 @@ def logout(headers, cookies):
         print('Something Went Wrong')
     return res
 
+
+
 if __name__ == "__main__":
 
-    list = 'Global Block: Sites' #list to edit
+    list = 'Blocked Clients'  # list to edit
     value = sys.argv[1]
-
+    headers = CaseInsensitiveDict()
     headers = {'Content-Type': 'application/xml'}
 
-    cookie = login(headers)
-    cookies = {'JSESSIONID': cookie}
+    try:
+        cookie = login(headers)
+        cookies = {'JSESSIONID': cookie}
+        # create_backup(headers, cookies)
+        list_id = get_list_id(headers, cookies, list)
 
-    list_id = get_list_id(headers, cookies, list)
+        insert = insert_list(headers, cookies, list, list_id, str(value))
+        commit = commit(headers, cookies)
 
-    insert = insert_list(headers, cookies, list, list_id, value)
-    commit = commit(headers, cookies)
-
-    logout = logout(headers, cookies)
+        logout = logout(headers, cookies)
+    except:
+        print("Exit with errors")
+        logout = logout(headers, cookies)
+        exit(1)
