@@ -32,3 +32,35 @@ To see the changes in the McAfee Web Gateway UI click on Reload Data from Backen
 ![screen shot 2018-08-08 at 16 20 53](https://user-images.githubusercontent.com/25227268/43843096-0debc760-9b27-11e8-9b91-5f90dfe34efb.png)
 
 This script can also be used in combination with the McAfee ESM to create right click actions to Block IP's or Domains.
+
+## Global Blacklist 
+
+Adding a client block list to the global blacklist 
+
+```python
+<entry>
+    <id>com.scur.type.ip.316</id>
+    <title>Blocked Clients</title>
+    <type>com.scur.type.ip</type>
+    <listType>ip</listType>
+    <link href="https://mwg:4712/Konfigurator/REST/list/com.scur.type.ip.316" rel="self"/>
+    <content>
+        <list version="1.0.3.46" mwg-version="10.2.5-39162" name="Blocked Clients" id="com.scur.type.ip.316" typeId="com.scur.type.ip" classifier="Other" systemList="false" structuralList="false" defaultRights="2">
+            <description>List of blocked client IPs</description>
+            <content>
+                <listEntry>
+                    <entry>8.8.8.8</entry>
+                    <description></description>
+                </listEntry>
+                <listEntry>
+                    <entry>4.4.4.4</entry>
+                    <description></description>
+                </listEntry>
+            </content>
+        </list>
+    </content>
+</entry>
+```
+![Screenshot from 2022-04-20 23-06-17](https://user-images.githubusercontent.com/44593913/164237801-7943c39a-11dd-47a5-aba3-4ca98a750a01.png)
+
+
